@@ -8,14 +8,35 @@
 </head>
 <body>
   <!-- CINEMATIC INTRO -->
-  <div class="intro-screen">
-    <div class="intro-lock">🔒</div>
-    <p class="intro-line">IDENTITY UNLOCKED</p>
-  </div>
+  <section class="hero-intro" id="hero-intro">
+    <!-- metallic light line -->
+    <div class="hero-light-streak"></div>
+
+    <!-- lock container -->
+    <div class="hero-lock-wrap">
+      <div class="hero-lock-orbit">
+        <img
+          src="assets/images/identity-lock.png"
+          alt="Chrome padlock"
+          class="hero-lock-img"
+        />
+        <div class="hero-lock-shadow"></div>
+      </div>
+    </div>
+
+    <!-- tagline -->
+    <p class="hero-tagline">IDENTITY UNLOCKED</p>
+  </section>
 
   <!-- TOP NAV -->
   <header class="top-nav">
-    <div class="logo">STOLEN</div>
+    <div class="logo">
+      <span class="logo-dial" data-target="S">S</span>
+      <span class="logo-dial" data-target="T">T</span>
+      <span class="logo-dial" data-target="0">0</span>
+      <span class="logo-dial" data-target="L">L</span>
+      <span class="logo-dial" data-target="N">N</span>
+    </div>
     <nav class="nav-links">
       <a href="#gate">The Gate</a>
       <a href="#theory">Lock Theory</a>
@@ -140,23 +161,45 @@
         
         <!-- Access Gate Overlay -->
         <div class="shop-gate-overlay">
-          <div class="shop-gate-content">
-            <div class="shop-gate-lock">🔒</div>
-            <h2 class="shop-gate-title">ACCESS REQUIRED</h2>
-            <p class="shop-gate-text">
+          <div class="gate-card">
+            <!-- BRAND LOCK WITH IMAGE -->
+            <div class="brand-lock">
+              <div class="lock-image-container">
+                <img src="assets/images/identity-lock.png" alt="Lock" class="lock-background-img" />
+              </div>
+              <div class="lock-body-overlay">
+                <div class="dial-row">
+                  <div class="dial"></div>
+                  <div class="dial"></div>
+                  <div class="dial"></div>
+                  <div class="dial"></div>
+                  <div class="dial"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TEXT -->
+            <h1 class="gate-title">ACCESS REQUIRED</h1>
+            <p class="gate-copy">
               The Collection is not for observers. Enter your access code to unlock.
             </p>
-            <div class="shop-gate-form">
+
+            <!-- FORM -->
+            <form class="gate-form" id="gate-form">
               <input
+                type="password"
                 id="shop-access-code"
-                type="text"
-                placeholder="ENTER CODE"
                 autocomplete="off"
+                placeholder="ENTER CODE"
               />
-              <button id="shop-access-btn">UNLOCK SHOP</button>
-            </div>
-            <p id="shop-access-result" class="shop-access-result"></p>
-            <p class="shop-gate-hint">Hint: Use <strong>UNLOCKED</strong> to access</p>
+              <button type="submit" id="shop-access-btn">UNLOCK SHOP</button>
+            </form>
+
+            <p class="gate-hint">
+              Hint: Use <span>UNLOCKED</span> to access
+            </p>
+
+            <p class="gate-message" id="shop-access-result"></p>
           </div>
         </div>
 

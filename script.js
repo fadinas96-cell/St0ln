@@ -1,3 +1,54 @@
+// ============================================
+// SHARED VARIABLES
+// ============================================
+const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+// ============================================
+// LOGO COMBINATION LOCK ANIMATION
+// ============================================
+const logoDials = document.querySelectorAll('.logo-dial');
+
+// Initialize with random characters
+logoDials.forEach(dial => {
+  dial.textContent = chars[Math.floor(Math.random() * chars.length)];
+});
+
+function spinLogoToTarget() {
+  const totalDuration = 2500;  // total time until final letter
+  const stagger = 180;         // delay between each dial stopping
+
+  logoDials.forEach((dial, index) => {
+    const target = dial.getAttribute('data-target');
+    let elapsed = 0;
+    const startTime = performance.now();
+
+    const interval = setInterval(() => {
+      // keep rolling with random characters
+      dial.textContent = chars[Math.floor(Math.random() * chars.length)];
+    }, 50);  // how fast each dial "rolls"
+
+    // when to stop this dial
+    const stopTime = totalDuration + index * stagger;
+
+    function checkStop(time) {
+      elapsed = time - startTime;
+      if (elapsed >= stopTime) {
+        clearInterval(interval);
+        dial.textContent = target; // lock in final letter
+      } else {
+        requestAnimationFrame(checkStop);
+      }
+    }
+
+    requestAnimationFrame(checkStop);
+  });
+}
+
+// Auto-spin after intro animation
+window.addEventListener('load', () => {
+  setTimeout(spinLogoToTarget, 2000); // Wait for intro to finish
+});
+
 // Smooth scroll for "ENTER THE GATE" button
 document.querySelectorAll("[data-scroll]").forEach((btn) => {
   btn.addEventListener("click", (e) => {
@@ -11,12 +62,17 @@ document.querySelectorAll("[data-scroll]").forEach((btn) => {
 });
 
 // ============================================
-// SHOP ACCESS GATE
+// SHOP ACCESS GATE WITH COMBINATION LOCK
 // ============================================
 const shopAccessBtn = document.getElementById("shop-access-btn");
 const shopAccessInput = document.getElementById("shop-access-code");
 const shopAccessResult = document.getElementById("shop-access-result");
 const shopSection = document.getElementById("shop");
+const gateForm = document.getElementById("gate-form");
+const shopDials = document.querySelectorAll(".dial");
+const gateCard = document.querySelector(".gate-card");
+const brandLock = document.querySelector(".brand-lock");
+const FIRST_VISIT_KEY = "st0ln_lock_seen";
 
 // Check if shop was previously unlocked
 const shopUnlocked = localStorage.getItem("shopUnlocked") === "true";
@@ -26,25 +82,88 @@ if (shopUnlocked && shopSection) {
   unlockKeyHolderProduct();
 }
 
-if (shopAccessBtn && shopAccessInput && shopAccessResult && shopSection) {
-  shopAccessBtn.addEventListener("click", handleShopAccess);
-  shopAccessInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") handleShopAccess();
+// Initialize shop lock dials
+const target = "ST0LN";
+
+// Drop-in animation for the lock
+if (brandLock) {
+  setTimeout(() => {
+    brandLock.classList.add("lock-enter");
+  }, 80);
+}
+
+// Fill dials with random chars
+function randomizeShopDials() {
+  shopDials.forEach((dial) => {
+    dial.textContent = chars[Math.floor(Math.random() * chars.length)];
+  });
+}
+
+function spinShopDials() {
+  const totalDuration = 1400;
+  const stagger = 160;
+
+  shopDials.forEach((dial, index) => {
+    const start = performance.now();
+    const stopAt = totalDuration + index * stagger;
+
+    const spinner = setInterval(() => {
+      dial.textContent = chars[Math.floor(Math.random() * chars.length)];
+    }, 45);
+
+    function check(time) {
+      const elapsed = time - start;
+      if (elapsed >= stopAt) {
+        clearInterval(spinner);
+        dial.textContent = target[index];
+      } else {
+        requestAnimationFrame(check);
+      }
+    }
+
+    requestAnimationFrame(check);
+  });
+}
+
+// FIRST VISIT ONLY: auto rolling animation
+const hasSeenLock = localStorage.getItem(FIRST_VISIT_KEY) === "1";
+
+if (!hasSeenLock && !shopUnlocked) {
+  randomizeShopDials();
+  setTimeout(() => {
+    spinShopDials();
+  }, 2500);
+  localStorage.setItem(FIRST_VISIT_KEY, "1");
+} else {
+  // Just set the final word, no auto-roll
+  shopDials.forEach((dial, index) => {
+    dial.textContent = target[index];
+  });
+}
+
+// Handle form submission
+if (gateForm && shopAccessInput && shopAccessResult && shopSection) {
+  gateForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    handleShopAccess();
   });
 }
 
 function handleShopAccess() {
   const value = shopAccessInput.value.trim().toUpperCase();
+  shopAccessInput.value = "";
 
   if (!value) {
     shopAccessResult.textContent = "CODE REQUIRED";
-    shopAccessResult.style.color = "#9BA0A3";
+    shopAccessResult.className = "gate-message error";
     return;
   }
 
   if (value === "UNLOCKED") {
-    shopAccessResult.textContent = "ACCESS GRANTED ✓";
-    shopAccessResult.style.color = "#C3C7C9";
+    // Nice spin as a reward
+    spinShopDials();
+    shopAccessResult.textContent = "ACCESS GRANTED";
+    shopAccessResult.className = "gate-message success";
     
     // Unlock shop after brief delay
     setTimeout(() => {
@@ -52,16 +171,30 @@ function handleShopAccess() {
       shopSection.classList.add("shop-unlocked");
       localStorage.setItem("shopUnlocked", "true");
       unlockKeyHolderProduct();
-    }, 800);
+    }, 1800);
   } else {
-    shopAccessResult.textContent = "ACCESS DENIED";
-    shopAccessResult.style.color = "#9BA0A3";
+    // Wrong code: show "WRONG" on dials, then shake
+    const wrongText = "WRONG";
+    shopDials.forEach((dial, index) => {
+      dial.textContent = wrongText[index];
+    });
     
-    // Shake animation on wrong code
-    shopAccessInput.style.animation = "shake 0.4s";
+    shopAccessResult.textContent = "INVALID CODE";
+    shopAccessResult.className = "gate-message error";
+    
+    // Shake the whole card
+    if (gateCard) {
+      gateCard.classList.add("shake");
+      setTimeout(() => {
+        gateCard.classList.remove("shake");
+      }, 400);
+    }
+    
+    // Keep "WRONG" visible for 3 seconds, then spin back to ST0LN
     setTimeout(() => {
-      shopAccessInput.style.animation = "";
-    }, 400);
+      randomizeShopDials();
+      spinShopDials();
+    }, 3000);
   }
 }
 
