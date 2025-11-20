@@ -8,17 +8,22 @@ const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 // ============================================
 const logoDials = document.querySelectorAll('.logo-dial');
 
+// Logo variations that cycle through
+const logoVariations = ['STOLN', '5T0LN', '57OLN', 'ST0LN'];
+const textVariations = ['ST0LEN', 'ST0L3N', 'ST0LEN', 'STOLEN'];
+let currentVariationIndex = 0;
+
 // Initialize with random characters
 logoDials.forEach(dial => {
   dial.textContent = chars[Math.floor(Math.random() * chars.length)];
 });
 
-function spinLogoToTarget() {
-  const totalDuration = 2500;  // total time until final letter
+function spinLogoToTarget(targetWord = 'ST0LN') {
+  const totalDuration = 1500;  // total time until final letter
   const stagger = 180;         // delay between each dial stopping
 
   logoDials.forEach((dial, index) => {
-    const target = dial.getAttribute('data-target');
+    const targetChar = targetWord[index];
     let elapsed = 0;
     const startTime = performance.now();
 
@@ -34,7 +39,7 @@ function spinLogoToTarget() {
       elapsed = time - startTime;
       if (elapsed >= stopTime) {
         clearInterval(interval);
-        dial.textContent = target; // lock in final letter
+        dial.textContent = targetChar; // lock in final letter
       } else {
         requestAnimationFrame(checkStop);
       }
@@ -44,10 +49,39 @@ function spinLogoToTarget() {
   });
 }
 
+// Cycle logo variations on click
+function cycleLogoVariation() {
+  currentVariationIndex = (currentVariationIndex + 1) % logoVariations.length;
+  const nextVariation = logoVariations[currentVariationIndex];
+  const nextTextVariation = textVariations[currentVariationIndex];
+  
+  spinLogoToTarget(nextVariation);
+  updateLogoText(nextTextVariation);
+}
+
+// Update the STOLEN text
+function updateLogoText(newText) {
+  const logoText = document.querySelector('.logo-text');
+  if (logoText) {
+    logoText.textContent = newText;
+  }
+}
+
+// Auto-cycle logo every 10 seconds
+setInterval(cycleLogoVariation, 10000);
+
+// Add click listener to logo for manual cycling
+const logo = document.querySelector('.logo');
+if (logo) {
+  logo.addEventListener('click', cycleLogoVariation);
+  logo.style.cursor = 'pointer'; // Show it's clickable
+}
+
 // Auto-spin after intro animation
 window.addEventListener('load', () => {
   setTimeout(spinLogoToTarget, 2000); // Wait for intro to finish
 });
+
 
 // Smooth scroll for "ENTER THE GATE" button
 document.querySelectorAll("[data-scroll]").forEach((btn) => {
@@ -170,6 +204,10 @@ function handleShopAccess() {
       shopSection.classList.remove("shop-locked");
       shopSection.classList.add("shop-unlocked");
       localStorage.setItem("shopUnlocked", "true");
+      
+      // Trigger celebration animation
+      celebrateUnlock();
+      
       unlockKeyHolderProduct();
     }, 1800);
   } else {
@@ -190,6 +228,9 @@ function handleShopAccess() {
       }, 400);
     }
     
+    // Trigger red laser security effect
+    triggerLaserEffect();
+    
     // Keep "WRONG" visible for 3 seconds, then spin back to ST0LN
     setTimeout(() => {
       randomizeShopDials();
@@ -198,7 +239,136 @@ function handleShopAccess() {
   }
 }
 
-// Function to unlock the Key Holder exclusive product
+// Red laser security effect on wrong code
+function triggerLaserEffect() {
+  const laserCount = 10; // Number of laser lines
+  const goldenRatio = 1.618033988749895; // Golden ratio for natural distribution
+  
+  for (let i = 0; i < laserCount; i++) {
+    const laser = document.createElement("div");
+    laser.className = "security-laser";
+    
+    // Use golden ratio to distribute positions naturally
+    const goldenAngle = (i * 360 / (goldenRatio * goldenRatio)) % 360;
+    const normalizedPos = (goldenAngle / 360) * 100;
+    
+    // Determine which edge the laser comes from (4 edges)
+    const edge = Math.floor((goldenAngle / 90) % 4);
+    
+    // Duration based on golden ratio distribution
+    const duration = 0.35 + (normalizedPos / 100) * 0.5;
+    
+    // Delay based on golden ratio for cascade effect
+    const delay = (i / laserCount) * 0.2;
+    
+    if (edge === 0) {
+      // From LEFT edge, pointing right
+      const topPos = normalizedPos;
+      laser.style.cssText = `
+        position: fixed;
+        top: ${topPos}%;
+        left: -100%;
+        width: 150%;
+        height: 2px;
+        background: linear-gradient(90deg, 
+          transparent,
+          #ff1744 20%,
+          #ff5252 50%,
+          #ff1744 80%,
+          transparent);
+        box-shadow: 0 0 10px #ff1744, 0 0 20px rgba(255, 23, 68, 0.6);
+        pointer-events: none;
+        z-index: 9997;
+        animation: laser-sweep ${duration}s linear ${delay}s forwards;
+      `;
+    } else if (edge === 1) {
+      // From TOP edge, pointing down
+      const leftPos = normalizedPos;
+      laser.style.cssText = `
+        position: fixed;
+        top: -100%;
+        left: ${leftPos}%;
+        width: 2px;
+        height: 200%;
+        background: linear-gradient(180deg, 
+          transparent,
+          #ff1744 20%,
+          #ff5252 50%,
+          #ff1744 80%,
+          transparent);
+        box-shadow: 0 0 10px #ff1744, 0 0 20px rgba(255, 23, 68, 0.6);
+        pointer-events: none;
+        z-index: 9997;
+        animation: laser-vertical ${duration}s linear ${delay}s forwards;
+      `;
+    } else if (edge === 2) {
+      // From RIGHT edge, pointing left
+      const topPos = normalizedPos;
+      laser.style.cssText = `
+        position: fixed;
+        top: ${topPos}%;
+        right: -100%;
+        width: 150%;
+        height: 2px;
+        background: linear-gradient(270deg, 
+          transparent,
+          #ff1744 20%,
+          #ff5252 50%,
+          #ff1744 80%,
+          transparent);
+        box-shadow: 0 0 10px #ff1744, 0 0 20px rgba(255, 23, 68, 0.6);
+        pointer-events: none;
+        z-index: 9997;
+        animation: laser-sweep-right ${duration}s linear ${delay}s forwards;
+      `;
+    } else {
+      // From BOTTOM edge, pointing up
+      const leftPos = normalizedPos;
+      laser.style.cssText = `
+        position: fixed;
+        bottom: -100%;
+        left: ${leftPos}%;
+        width: 2px;
+        height: 200%;
+        background: linear-gradient(0deg, 
+          transparent,
+          #ff1744 20%,
+          #ff5252 50%,
+          #ff1744 80%,
+          transparent);
+        box-shadow: 0 0 10px #ff1744, 0 0 20px rgba(255, 23, 68, 0.6);
+        pointer-events: none;
+        z-index: 9997;
+        animation: laser-vertical-up ${duration}s linear ${delay}s forwards;
+      `;
+    }
+    
+    document.body.appendChild(laser);
+    
+    // Remove laser after animation
+    setTimeout(() => {
+      laser.remove();
+    }, (duration + delay) * 1000);
+  }
+  
+  // Add red screen flash effect
+  const redFlash = document.createElement("div");
+  redFlash.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 23, 68, 0.15);
+    pointer-events: none;
+    z-index: 9996;
+    animation: laser-flash 0.3s ease-out forwards;
+  `;
+  document.body.appendChild(redFlash);
+  setTimeout(() => redFlash.remove(), 300);
+}
+
+// Celebration animation when shop unlocks
 function unlockKeyHolderProduct() {
   const keyHolderBtn = document.querySelector('[data-id="3"].add-to-cart-btn');
   if (keyHolderBtn) {
@@ -214,6 +384,73 @@ function unlockKeyHolderProduct() {
       }, 500);
     }, 400);
   }
+}
+
+// Celebration animation when shop unlocks
+function celebrateUnlock() {
+  const shopSection = document.querySelector(".shop-gate");
+  if (!shopSection) return;
+  
+  // Create confetti particles
+  const particleCount = 30;
+  for (let i = 0; i < particleCount; i++) {
+    const particle = document.createElement("div");
+    particle.className = "confetti-particle";
+    
+    // Random horizontal position
+    const startX = Math.random() * window.innerWidth;
+    const startY = -20;
+    
+    // Random animation duration and delay
+    const duration = 2 + Math.random() * 1;
+    const delay = Math.random() * 0.2;
+    
+    // Random angle and spread
+    const angle = (Math.random() * 360) * Math.PI / 180;
+    const velocity = 3 + Math.random() * 5;
+    const endX = Math.cos(angle) * velocity * 100;
+    const endY = Math.sin(angle) * velocity * 100 + window.innerHeight;
+    
+    particle.style.cssText = `
+      position: fixed;
+      left: ${startX}px;
+      top: ${startY}px;
+      width: 8px;
+      height: 8px;
+      background: ${['#2dd4bf', '#14b8a6', '#e8e3d9', '#c3c7c9'][Math.floor(Math.random() * 4)]};
+      border-radius: ${Math.random() > 0.5 ? '50%' : '0%'};
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 1;
+      animation: confetti-fall ${duration}s linear ${delay}s forwards;
+      --tx: ${endX}px;
+      --ty: ${endY}px;
+      --rotate: ${Math.random() * 720}deg;
+    `;
+    
+    document.body.appendChild(particle);
+    
+    // Remove particle after animation
+    setTimeout(() => {
+      particle.remove();
+    }, (duration + delay) * 1000);
+  }
+  
+  // Add flash effect
+  const flash = document.createElement("div");
+  flash.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(45, 212, 191, 0.3);
+    pointer-events: none;
+    z-index: 9998;
+    animation: celebration-flash 0.6s ease-out forwards;
+  `;
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 600);
 }
 
 // Global function to reset shop lock (for testing)

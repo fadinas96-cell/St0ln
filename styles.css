@@ -9,6 +9,8 @@
   --silver: #c3c7c9;          /* Muted silver */
   --shadow-silver: #9ba0a3;   /* Soft metallic text */
   --border-soft: rgba(255, 255, 255, 0.06);
+  --accent: #e8e8f0;          /* Shiny silver accent for CTAs */
+  --accent-dark: #d0d0d8;     /* Darker silver for hover */
 }
 
 /* =========================
@@ -145,10 +147,11 @@ a {
   font-size: 13px;
   letter-spacing: 0.35em;
   text-indent: 0.35em;
-  color: #f5f5f5;
+  color: var(--accent);
   opacity: 0;
-  animation: hero-text-reveal 1s ease-out forwards;
-  animation-delay: 1s;
+  animation: hero-text-reveal 1s ease-out forwards, pulse-glow 2s ease-in-out 1.2s infinite;
+  animation-delay: 0.8s;
+  font-weight: 600;
 }
 
 /* ===== KEYFRAMES ===== */
@@ -228,6 +231,16 @@ a {
   100% { opacity: 0; visibility: hidden; }
 }
 
+/* Pulse glow effect */
+@keyframes pulse-glow {
+  0%, 100% {
+    text-shadow: 0 0 10px rgba(45, 212, 191, 0.3);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(45, 212, 191, 0.6), 0 0 30px rgba(45, 212, 191, 0.4);
+  }
+}
+
 /* =========================
    TOP NAV
    ========================= */
@@ -248,13 +261,13 @@ a {
 }
 
 .logo {
-  font-size: 0.9rem;
+  font-size: 1.3rem;
   text-transform: uppercase;
   letter-spacing: 0.15em;
   display: flex;
   align-items: center;
   gap: 3px;
-  padding: 6px 12px;
+  padding: 8px 16px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 6px;
   border: 1px solid var(--border-soft);
@@ -397,6 +410,13 @@ a {
   background: rgba(255, 255, 255, 0.05);
 }
 
+.cart-lock-icon {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0.95) contrast(1.1);
+  mix-blend-mode: screen;
+}
+
 .cart-count {
   background: var(--silver);
   color: var(--black);
@@ -527,13 +547,16 @@ main {
   font-size: 0.75rem;
   letter-spacing: 0.25em;
   cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  position: relative;
 }
 
 .ghost-btn:hover {
-  background: var(--silver);
+  background: var(--accent);
   color: var(--black);
-  transform: translateY(-1px);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(45, 212, 191, 0.5);
 }
 
 /* =========================
@@ -879,10 +902,18 @@ main {
   text-transform: uppercase;
   font-size: 12px;
   letter-spacing: 0.15em;
+  transition: all 0.3s ease;
 }
 
 .gate-form input::placeholder {
   color: #555;
+}
+
+.gate-form input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(45, 212, 191, 0.4), inset 0 0 8px rgba(45, 212, 191, 0.1);
+  background: rgba(45, 212, 191, 0.05);
 }
 
 .gate-form button {
@@ -892,15 +923,17 @@ main {
   text-transform: uppercase;
   letter-spacing: 0.18em;
   font-size: 11px;
-  background: #44473d;
-  color: #f5f5f5;
+  background: var(--accent);
+  color: var(--black);
   cursor: pointer;
-  transition: background 0.18s ease, transform 0.1s ease;
+  transition: all 0.3s ease;
+  font-weight: 600;
 }
 
 .gate-form button:hover {
-  background: #5a5f4c;
-  transform: translateY(-1px);
+  background: var(--accent-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(45, 212, 191, 0.4);
 }
 
 .gate-form button:active {
@@ -969,12 +1002,13 @@ main {
   border: 1px solid var(--border-soft);
   background: linear-gradient(145deg, #0a0a0a, #050505);
   overflow: hidden;
-  transition: transform 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .product-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--silver);
+  transform: translateY(-6px);
+  border-color: var(--accent);
+  box-shadow: 0 12px 30px rgba(45, 212, 191, 0.2);
 }
 
 .product-image {
@@ -992,13 +1026,13 @@ main {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease, filter 0.3s ease;
+  transition: transform 0.6s ease, filter 0.3s ease;
   filter: grayscale(30%) brightness(0.85);
 }
 
 .product-card:hover .product-image img {
-  transform: scale(1.05);
-  filter: grayscale(0%) brightness(1);
+  transform: scale(1.12);
+  filter: grayscale(0%) brightness(1.1);
 }
 
 .product-placeholder {
@@ -1053,9 +1087,9 @@ main {
 }
 
 .add-to-cart-btn {
-  background: var(--olive);
+  background: var(--accent);
   border: none;
-  color: var(--bone);
+  color: var(--black);
   padding: 10px 16px;
   font-size: 0.65rem;
   text-transform: uppercase;
@@ -1064,12 +1098,14 @@ main {
   transition: all 0.25s ease;
   white-space: nowrap;
   flex-shrink: 0;
+  font-weight: 600;
 }
 
 .add-to-cart-btn:hover:not(:disabled) {
-  background: var(--silver);
-  color: var(--black);
-  transform: translateY(-2px);
+  background: var(--accent-dark);
+  color: var(--bone);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(45, 212, 191, 0.4);
 }
 
 .add-to-cart-btn:disabled,
@@ -1223,7 +1259,7 @@ main {
 
 .checkout-btn {
   width: 100%;
-  background: var(--silver);
+  background: var(--accent);
   border: none;
   color: var(--black);
   padding: 16px;
@@ -1237,8 +1273,10 @@ main {
 }
 
 .checkout-btn:hover {
-  background: var(--bone);
-  transform: translateY(-2px);
+  background: var(--accent-dark);
+  color: var(--bone);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(45, 212, 191, 0.5);
 }
 
 .cart-note {
@@ -1437,5 +1475,95 @@ main {
 
   .cart-btn span:not(.cart-count) {
     display: none;
+  }
+}
+
+/* Celebration Animations */
+@keyframes confetti-fall {
+  to {
+    transform: translate(var(--tx), var(--ty)) rotate(var(--rotate));
+    opacity: 0;
+  }
+}
+
+@keyframes celebration-flash {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.confetti-particle {
+  will-change: transform, opacity;
+}
+
+/* Laser Security Effect */
+@keyframes laser-sweep {
+  0% {
+    left: -100%;
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes laser-sweep-right {
+  0% {
+    right: -100%;
+    opacity: 1;
+  }
+  100% {
+    right: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes laser-vertical {
+  0% {
+    top: -100%;
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes laser-vertical-up {
+  0% {
+    bottom: -100%;
+    opacity: 1;
+  }
+  100% {
+    bottom: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes laser-diagonal {
+  0% {
+    top: -50%;
+    left: -50%;
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes laser-flash {
+  0% {
+    opacity: 1;
+    background: rgba(255, 23, 68, 0.3);
+  }
+  100% {
+    opacity: 0;
+    background: rgba(255, 23, 68, 0);
   }
 }
