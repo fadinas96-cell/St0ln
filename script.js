@@ -77,6 +77,43 @@ if (logo) {
   logo.style.cursor = 'pointer'; // Show it's clickable
 }
 
+// Function to spin gate card dials
+function spinGateDials() {
+  const gateDials = document.querySelectorAll('.brand-lock .dial');
+  if (!gateDials.length) return;
+
+  const targetChars = ['S', 'T', '0', 'L', 'N'];
+  const spinDuration = 600;
+  const stagger = 80;
+
+  gateDials.forEach((dial, index) => {
+    // Add spinning animation
+    dial.classList.add('spinning');
+    
+    let elapsed = 0;
+    const startTime = performance.now();
+
+    const interval = setInterval(() => {
+      dial.textContent = chars[Math.floor(Math.random() * chars.length)];
+    }, 50);
+
+    const stopTime = spinDuration + index * stagger;
+
+    function checkStop(time) {
+      elapsed = time - startTime;
+      if (elapsed >= stopTime) {
+        clearInterval(interval);
+        dial.textContent = targetChars[index];
+        dial.classList.remove('spinning');
+      } else {
+        requestAnimationFrame(checkStop);
+      }
+    }
+
+    requestAnimationFrame(checkStop);
+  });
+}
+
 // Auto-spin after intro animation
 window.addEventListener('load', () => {
   setTimeout(spinLogoToTarget, 2000); // Wait for intro to finish
@@ -133,11 +170,15 @@ function randomizeShopDials() {
   });
 }
 
-function spinShopDials() {
+function spinShopDials(callback) {
   const totalDuration = 1400;
   const stagger = 160;
+  let completedCount = 0;
 
   shopDials.forEach((dial, index) => {
+    // Add spinning animation class
+    dial.classList.add('spinning');
+    
     const start = performance.now();
     const stopAt = totalDuration + index * stagger;
 
@@ -150,6 +191,13 @@ function spinShopDials() {
       if (elapsed >= stopAt) {
         clearInterval(spinner);
         dial.textContent = target[index];
+        dial.classList.remove('spinning');
+        completedCount++;
+        
+        // Call callback when all dials have finished spinning
+        if (callback && completedCount === shopDials.length) {
+          callback();
+        }
       } else {
         requestAnimationFrame(check);
       }
@@ -199,6 +247,9 @@ function handleShopAccess() {
     shopAccessResult.textContent = "ACCESS GRANTED";
     shopAccessResult.className = "gate-message success";
     
+    // Trigger success lasers immediately
+    triggerSuccessLasers();
+    
     // Unlock shop after brief delay
     setTimeout(() => {
       shopSection.classList.remove("shop-locked");
@@ -211,13 +262,16 @@ function handleShopAccess() {
       unlockKeyHolderProduct();
     }, 1800);
   } else {
-    // Wrong code: show "WRONG" on dials, then shake
-    const wrongText = "WRONG";
-    shopDials.forEach((dial, index) => {
-      dial.textContent = wrongText[index];
+    // Wrong code: spin dials first, then show "WRONG"
+    spinShopDials(() => {
+      // After spinning, display "WRONG"
+      const wrongText = "WRONG";
+      shopDials.forEach((dial, index) => {
+        dial.textContent = wrongText[index];
+      });
     });
     
-    shopAccessResult.textContent = "INVALID CODE";
+    shopAccessResult.textContent = "INVALID ACCESS - KEY REJECTED";
     shopAccessResult.className = "gate-message error";
     
     // Shake the whole card
@@ -237,6 +291,85 @@ function handleShopAccess() {
       spinShopDials();
     }, 3000);
   }
+}
+
+// Success laser effect - solid green lasers that linger
+function triggerSuccessLasers() {
+  const laserCount = 4; // Fewer lasers - only horizontal
+  const goldenRatio = 1.618033988749895;
+  
+  for (let i = 0; i < laserCount; i++) {
+    const laser = document.createElement("div");
+    laser.className = "success-laser";
+    
+    // Use golden ratio to distribute positions
+    const goldenAngle = (i * 360 / (goldenRatio * goldenRatio)) % 360;
+    const normalizedPos = (goldenAngle / 360) * 100;
+    
+    // Only horizontal lasers - alternate from left and right
+    const fromLeft = i % 2 === 0;
+    
+    // Shorter duration - quick flash effect
+    const duration = 1.2 + (normalizedPos / 100) * 0.3;
+    
+    // Staggered delay for cascade effect
+    const delay = (i / laserCount) * 0.1;
+    
+    if (fromLeft) {
+      // From LEFT edge
+      const topPos = 25 + (i * 20); // Distribute vertically
+      laser.style.cssText = `
+        position: fixed;
+        top: ${topPos}%;
+        left: -100%;
+        width: 150%;
+        height: 1px;
+        background: #39ff14;
+        box-shadow: 0 0 10px #39ff14, 0 0 20px rgba(57, 255, 20, 0.6);
+        pointer-events: none;
+        z-index: 9997;
+        animation: success-laser-sweep ${duration}s linear ${delay}s forwards;
+      `;
+    } else {
+      // From RIGHT edge
+      const topPos = 25 + (i * 20); // Distribute vertically
+      laser.style.cssText = `
+        position: fixed;
+        top: ${topPos}%;
+        right: -100%;
+        width: 150%;
+        height: 1px;
+        background: #39ff14;
+        box-shadow: 0 0 10px #39ff14, 0 0 20px rgba(57, 255, 20, 0.6);
+        pointer-events: none;
+        z-index: 9997;
+        animation: success-laser-sweep-right ${duration}s linear ${delay}s forwards;
+      `;
+    }
+    
+    document.body.appendChild(laser);
+    
+    // Remove laser after animation
+    setTimeout(() => {
+      laser.remove();
+    }, (duration + delay) * 1000);
+  }
+  
+  // Add green success flash
+  const greenFlash = document.createElement("div");
+  greenFlash.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(57, 255, 20, 0.1);
+    pointer-events: none;
+    z-index: 9996;
+    animation: success-flash 1.2s ease-out forwards;
+  `;
+  document.body.appendChild(greenFlash);
+  setTimeout(() => greenFlash.remove(), 1200);
 }
 
 // Red laser security effect on wrong code

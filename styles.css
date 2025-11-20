@@ -11,6 +11,9 @@
   --border-soft: rgba(255, 255, 255, 0.06);
   --accent: #e8e8f0;          /* Shiny silver accent for CTAs */
   --accent-dark: #d0d0d8;     /* Darker silver for hover */
+  --red-shadow: #ff1744;      /* Neon red for shadows and glows */
+  --neon-green: #39ff14;      /* Neon green for checkout/cart */
+  --neon-red: #ff1744;        /* Neon red for unlock */
 }
 
 /* =========================
@@ -95,8 +98,8 @@ a {
 /* actual lock image */
 .hero-lock-img {
   display: block;
-  width: 260px;          /* tweak to taste */
-  max-width: 60vw;
+  width: 380px;          /* increased from 260px */
+  max-width: 85vw;
   filter: blur(8px);
   opacity: 0;
   transform: translateY(25px) scale(0.96);
@@ -144,7 +147,7 @@ a {
 /* tagline text */
 .hero-tagline {
   margin-top: 140px;
-  font-size: 13px;
+  font-size: 22px;
   letter-spacing: 0.35em;
   text-indent: 0.35em;
   color: var(--accent);
@@ -556,7 +559,7 @@ main {
   color: var(--black);
   border-color: var(--accent);
   transform: translateY(-2px);
-  box-shadow: 0 0 20px rgba(45, 212, 191, 0.5);
+  box-shadow: 0 0 20px rgba(255, 23, 68, 0.6), 0 8px 16px rgba(255, 23, 68, 0.3);
 }
 
 /* =========================
@@ -766,6 +769,7 @@ main {
   margin-bottom: 26px;
   opacity: 0;                 /* for drop-in animation */
   transform: translateY(-24px);
+  perspective: 1000px;
 }
 
 /* when JS adds this class, the lock drops in */
@@ -794,19 +798,7 @@ main {
 /* Overlay for dials positioned over the lock body */
 .lock-body-overlay {
   position: relative;
-  background: linear-gradient(135deg, 
-    rgba(91, 91, 91, 0.6), 
-    rgba(163, 163, 163, 0.5),
-    rgba(91, 91, 91, 0.6)
-  );
-  backdrop-filter: blur(4px);
   padding: 6px 12px;
-  border-radius: 999px;
-  box-shadow: 
-    0 4px 16px rgba(0, 0, 0, 0.7),
-    0 2px 8px rgba(0, 0, 0, 0.5),
-    inset 0 1px 2px rgba(255, 255, 255, 0.15),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -817,6 +809,7 @@ main {
 .dial-row {
   display: flex;
   gap: 6px;
+  perspective: 1000px;
 }
 
 /* INDIVIDUAL WHEEL (LETTER CELL) */
@@ -836,6 +829,7 @@ main {
   box-shadow:
     0 2px 0 rgba(0, 0, 0, 0.65),
     inset 0 0 4px rgba(255, 255, 255, 0.25);
+  transform-style: preserve-3d;
 }
 
 /* SHAKE animation – applied to the whole card on wrong code */
@@ -868,6 +862,26 @@ main {
   30%, 50%, 70% { transform: translateX(-4px); }
   40%, 60% { transform: translateX(4px); }
   0%, 100% { transform: translateX(0); }
+}
+
+/* Spin animation for dials */
+@keyframes dial-spin {
+  0% { 
+    transform: rotateY(0deg) rotateX(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: rotateY(180deg) rotateX(10deg);
+    opacity: 0.8;
+  }
+  100% { 
+    transform: rotateY(360deg) rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+.dial.spinning {
+  animation: dial-spin 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* Text */
@@ -933,7 +947,7 @@ main {
 .gate-form button:hover {
   background: var(--accent-dark);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(45, 212, 191, 0.4);
+  box-shadow: 0 0 15px rgba(255, 23, 68, 0.6), 0 8px 20px rgba(255, 23, 68, 0.4);
 }
 
 .gate-form button:active {
@@ -1105,7 +1119,7 @@ main {
   background: var(--accent-dark);
   color: var(--bone);
   transform: translateY(-3px);
-  box-shadow: 0 8px 15px rgba(45, 212, 191, 0.4);
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.6), 0 8px 15px rgba(57, 255, 20, 0.3);
 }
 
 .add-to-cart-btn:disabled,
@@ -1276,7 +1290,7 @@ main {
   background: var(--accent-dark);
   color: var(--bone);
   transform: translateY(-3px);
-  box-shadow: 0 12px 25px rgba(45, 212, 191, 0.5);
+  box-shadow: 0 0 25px rgba(57, 255, 20, 0.6), 0 12px 25px rgba(57, 255, 20, 0.4);
 }
 
 .cart-note {
@@ -1565,5 +1579,121 @@ main {
   100% {
     opacity: 0;
     background: rgba(255, 23, 68, 0);
+  }
+}
+
+/* Success Laser Animations (Solid Green, Lingering with Flash) */
+@keyframes success-laser-sweep {
+  0% {
+    left: -100%;
+    opacity: 1;
+  }
+  65% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0;
+  }
+  80% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 0;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes success-laser-sweep-right {
+  0% {
+    right: -100%;
+    opacity: 1;
+  }
+  65% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0;
+  }
+  80% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 0;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    right: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes success-laser-vertical {
+  0% {
+    top: -100%;
+    opacity: 1;
+  }
+  65% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0;
+  }
+  80% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 0;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes success-laser-vertical-up {
+  0% {
+    bottom: -100%;
+    opacity: 1;
+  }
+  65% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0;
+  }
+  80% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 0;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    bottom: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes success-flash {
+  0% {
+    opacity: 1;
+    background: rgba(57, 255, 20, 0.2);
+  }
+  100% {
+    opacity: 0;
+    background: rgba(57, 255, 20, 0);
   }
 }
